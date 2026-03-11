@@ -13,9 +13,9 @@ prices = data['Price'].values
 
 drawdown_labels = []
 
-threshold = 0.03  # 3% drop
+threshold = 0.05  # 5% drop
 
-# label[t] = 1 if price drops ≥3% in next 6h
+# label[t] = 1 if price drops ≥5% in next 6h
 for i in range(len(prices)):
     if i == len(prices) - 1:
         drawdown_labels.append(0)
