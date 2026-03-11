@@ -1,0 +1,12 @@
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+tensorflow
+jupyter
+ipykernel
+python-dotenv
+tqdm
+google-cloud-bigquery
+pyarrow
