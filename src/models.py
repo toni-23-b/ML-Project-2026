@@ -27,7 +27,7 @@ print(f"--- 📁 Experiment tracking active. Saving results to: {OUTPUT_DIR} ---
 # ==========================================
 print("\n--- 1. Loading Clustered Dataset ---")
 
-file_path = 'data/processed/eth_merged_6h_clustered_3%.csv'
+file_path = 'data/processed/eth_merged_6h_2021_to_latest.csv'
 data = pd.read_csv(file_path)
 data['hour'] = pd.to_datetime(data['hour'])
 data.set_index('hour', inplace=True)
@@ -58,8 +58,7 @@ print("--- 3. Selecting and Scaling Features ---")
 
 feature_columns = [
     'Close', 'Volume ETH', 'massive_whale_volume', 'max_gas_gwei',
-    'unique_large_senders', 'whale_contract_calls', 'total_network_volume', 
-    'Market_Regime' 
+    'unique_large_senders', 'whale_contract_calls', 'total_network_volume'
 ]
 features = data[feature_columns].values
 scaler = MinMaxScaler(feature_range=(0,1))
