@@ -91,11 +91,11 @@ def merge_price_and_whale(price_df: pd.DataFrame, whale_df: pd.DataFrame) -> pd.
 
 
 def add_drawdown_label(df: pd.DataFrame) -> pd.DataFrame:
-    """Add binary target: 1 if price drops >=5% within next 2 hours, else 0.
+    """Add binary target: 1 if price drops >=3% within next 2 hours, else 0.
 
     Label definition at hour t:
     future_low = min(low[t+1], low[t+2])
-    label = 1 if future_low <= close[t] * 0.95 else 0
+    label = 1 if future_low <= close[t] * 0.97 else 0
     """
     out = df.copy()
 
@@ -108,6 +108,6 @@ def add_drawdown_label(df: pd.DataFrame) -> pd.DataFrame:
     ], axis=1).min(axis=1)
 
     out["future_low_2h"] = future_low
-    out["drawdown_label"] = (out["future_low_2h"] <= out[close_col] * 0.95).fillna(False).astype(int)
+    out["drawdown_label"] = (out["future_low_2h"] <= out[close_col] * 0.97).fillna(False).astype(int)
 
     return out

@@ -92,7 +92,7 @@ def build_dataset() -> pd.DataFrame:
     # Use next 6h Low to capture downside risk inside the next interval.
     merged_df["future_price"] = merged_df["Low"].shift(-1)
     merged_df["future_drop_pct"] = (merged_df["future_price"] - merged_df["Close"]) / merged_df["Close"]
-    merged_df["drawdown_6h_label"] = np.where(merged_df["future_drop_pct"] <= -0.05, 1, 0)
+    merged_df["drawdown_6h_label"] = np.where(merged_df["future_drop_pct"] <= -0.03, 1, 0)
 
     # Drop final row because it has no future interval for target calculation.
     merged_df = merged_df.dropna(subset=["future_price"]).reset_index(drop=True)
