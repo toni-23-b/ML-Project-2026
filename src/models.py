@@ -27,7 +27,7 @@ print(f"--- 📁 Experiment tracking active. Saving results to: {OUTPUT_DIR} ---
 # ==========================================
 print("\n--- 1. Loading Clustered Dataset ---")
 
-file_path = 'data/processed/eth_merged_6h_clustered.csv'
+file_path = 'data/processed/eth_merged_6h_clustered_3%.csv'
 data = pd.read_csv(file_path)
 data['hour'] = pd.to_datetime(data['hour'])
 data.set_index('hour', inplace=True)
@@ -97,7 +97,6 @@ X_validate, X_test, y_validate, y_test, dates_validate, dates_test = train_test_
     X_temp, y_temp, dates_temp, test_size=0.50, shuffle=False
 )
 
-print(X_train[0])
 # ==========================================
 # 6. CALCULATE WEIGHTS & BIAS FOR RARE CRASHES
 # ==========================================
