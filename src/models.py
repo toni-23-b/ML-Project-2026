@@ -13,8 +13,8 @@ from sklearn.model_selection import train_test_split
 # ==========================================
 #  Fine-Tuning Hyperparameters
 # ==========================================
-EXPERIMENT_NAME = "LSTM_Threshold_5Percent_Adjusted"
-CRASH_THRESHOLD = 0.05       # 5% drop defines a crash
+EXPERIMENT_NAME = "LSTM_Threshold_3Percent_Adjusted"
+CRASH_THRESHOLD = 0.03       # 3% drop defines a crash
 PREDICTION_TRIGGER = 0.15    # If AI is >15% sure, sound the alarm! (Lowered from 50%)
 
 # Setup automatic saving folder
