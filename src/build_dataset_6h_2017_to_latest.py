@@ -1,4 +1,4 @@
-"""Build a 6-hour ETH + whale-feature dataset from 2021 to latest common timestamp."""
+"""Build a 6-hour ETH + whale-feature dataset from 2017 to latest common timestamp."""
 
 from __future__ import annotations
 
@@ -7,9 +7,9 @@ import pandas as pd
 
 PRICE_PATH = "data/raw/Binance_ETHUSDT_1h.csv"
 WHALE_PATH = "data/raw/bigquery_whale_data.csv"
-OUTPUT_PATH = "data/processed/eth_merged_6h_2021_to_latest.csv"
+OUTPUT_PATH = "data/processed/eth_merged_6h_2017_to_latest.csv"
 
-START_TS = pd.Timestamp("2021-01-01 00:00:00")
+START_TS = pd.Timestamp("2017-08-17 06:00:00")
 
 
 def build_dataset() -> pd.DataFrame:
