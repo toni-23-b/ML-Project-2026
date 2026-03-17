@@ -93,7 +93,7 @@ def build_dataset() -> pd.DataFrame:
     # better than next Close.
     merged_df["future_price"] = merged_df["Low"].shift(-1)
     merged_df["future_drop_pct"] = (merged_df["future_price"] - merged_df["Close"]) / merged_df["Close"]
-    merged_df["drawdown_6h_label"] = np.where(merged_df["future_drop_pct"] <= -0.05, 1, 0)
+    merged_df["drawdown_6h_label"] = np.where(merged_df["future_drop_pct"] <= -0.03, 1, 0)
 
     # Last row has no future 6h row; we drop it to avoid training on unknown target.
     merged_df = merged_df.dropna(subset=["future_price"]).reset_index(drop=True)

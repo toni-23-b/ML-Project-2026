@@ -4,10 +4,10 @@ This university machine learning project predicts short-term Ethereum drawdowns.
 
 ## Project Goal
 
-We build a binary classifier that predicts whether ETH will experience a drawdown in the next 2 hours.
+We build a binary classifier that predicts whether ETH will experience a drawdown in the next 6 hours.
 
 - Target label at hour t:
-	- label = 1 if ETH drops by 5% or more at any point in t+1 to t+2 hours
+	- label = 1 if ETH drops by 3% or more in the next 6-hour interval
 	- label = 0 otherwise
 
 We use an LSTM model over rolling 24-hour sequences of hourly features.
@@ -34,7 +34,7 @@ ml-crypto-project/
 ├─ notebooks/
 │  ├─ 01_exploration.ipynb
 │  ├─ 02_merge_and_label.ipynb
-│  └─ 03_lstm_model.ipynb
+│  └─ 03_plots.ipynb
 ├─ src/
 │  ├─ data_prep.py
 │  └─ models.py
