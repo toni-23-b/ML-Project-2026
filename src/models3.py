@@ -9,34 +9,46 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
+from datetime import datetime
 
 # ==========================================
 #  Fine-Tuning Hyperparameters
 # ==========================================
-EXPERIMENT_NAME = "LSTM_Threshold_3Percent_Adjusted"
-CRASH_THRESHOLD = 0.03       # 3% drop defines a crash
-PREDICTION_TRIGGER = 0.15    # If AI is >15% sure, sound the alarm! (Lowered from 50%)
+CRASH_THRESHOLD = 0.03       
+PREDICTION_TRIGGER = 0.50    # Lowered trigger to catch the 19% confidences!
 
-# Setup automatic saving folder
+# Generates a unique name 
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+EXPERIMENT_NAME = f"LSTM_Run_{timestamp}"
+
 OUTPUT_DIR = f"results/{EXPERIMENT_NAME}"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-print(f"--- Experiment tracking active. Saving results to: {OUTPUT_DIR} ---")
+print(f"--- Experiment tracking active. Saving to: {OUTPUT_DIR} ---")
 
 # ==========================================
 # 1. LOAD DATASET
 # ==========================================
-print("\n--- 1. Loading Clustered Dataset ---")
 
-file_path = 'data/processed/eth_merged_6h_2021_to_latest.csv'
+print("\n--- 1. Loading & Engineering Features ---")
+
+file_path = 'data/processed/eth_merged_6h_clustered_2017.csv'
 data = pd.read_csv(file_path)
 data['hour'] = pd.to_datetime(data['hour'])
 data.set_index('hour', inplace=True)
 data = data.sort_index()
 
+# THE BIG FIX: Convert raw numbers into Momentum (% Change)
+data['Close_Pct'] = data['Close'].pct_change()
+data['Volume_Pct'] = data['Volume ETH'].pct_change()
+data['Whale_Vol_Pct'] = data['massive_whale_volume'].pct_change()
+
+# Drop the first row because pct_change leaves a blank (NaN) value
+data = data.dropna()
+
 # ==========================================
-# 2. TARGET
+# 2. TARGET (24-Hour Lookahead Window)
 # ==========================================
-print(f"--- 2. Tagging Crashes (Drops >= {CRASH_THRESHOLD*100}%) ---")
+print(f"--- 2. Tagging Crashes (Drops >= {CRASH_THRESHOLD*100}% in EXACTLY the next 6 hours) ---")
 
 prices = data['Close'].values
 drawdown_labels = []
@@ -45,6 +57,7 @@ for i in range(len(prices)):
     if i == len(prices) - 1:
         drawdown_labels.append(0)
     else:
+        # Looking ONLY at the very next 6-hour segment
         drop = (prices[i] - prices[i+1]) / prices[i]
         drawdown_labels.append(1 if drop >= CRASH_THRESHOLD else 0)
 
@@ -55,11 +68,12 @@ print(f"Total Crashes found in entire dataset: {sum(drawdown_labels)}")
 # 3. FEATURE SELECTION & SCALING
 # ==========================================
 print("--- 3. Selecting and Scaling Features ---")
-
+# We swap out the raw numbers for our new Momentum columns!
 feature_columns = [
-    'Close', 'Volume ETH', 'massive_whale_volume', 'max_gas_gwei',
-    'unique_large_senders', 'whale_contract_calls', 'total_network_volume'
+    'Close_Pct', 'Volume_Pct', 'Whale_Vol_Pct', 
+    'max_gas_gwei', 'unique_large_senders', 'whale_contract_calls', 'Market_Regime'
 ]
+
 features = data[feature_columns].values
 scaler = MinMaxScaler(feature_range=(0,1))
 scaled_features = scaler.fit_transform(features)
@@ -97,20 +111,16 @@ X_validate, X_test, y_validate, y_test, dates_validate, dates_test = train_test_
 )
 
 # ==========================================
-# 6. CALCULATE WEIGHTS & BIAS FOR RARE CRASHES
+# 6. CALCULATE WEIGHTS FOR RARE CRASHES
 # ==========================================
 neg = np.sum(y_train == 0)
 pos = np.sum(y_train == 1)
-pos = max(pos, 1) # Prevent dividing by zero just in case
+pos = max(pos, 1)
 
-# Penalties for the AI
+# Because crashes are rare again, we MUST penalize the AI for missing them
 weight_for_0 = (1 / neg) * (len(y_train) / 2.0)
 weight_for_1 = (1 / pos) * (len(y_train) / 2.0)
 class_weights = {0: weight_for_0, 1: weight_for_1}
-
-# Tell AI upfront that crashes are rare
-initial_bias = np.log([pos/neg])
-output_bias = tf.keras.initializers.Constant(initial_bias)
 
 # ==========================================
 # 7. BUILD AND TRAIN THE AI
@@ -121,7 +131,7 @@ model.add(LSTM(128, return_sequences=True, input_shape=(X_train.shape[1], X_trai
 model.add(Dropout(0.2))
 model.add(LSTM(128))
 model.add(Dropout(0.2))
-model.add(Dense(1, activation='sigmoid', bias_initializer=output_bias))
+model.add(Dense(1, activation='sigmoid'))
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
@@ -130,7 +140,7 @@ history = model.fit(
     epochs=20,          
     batch_size=32,      
     validation_data=(X_validate, y_validate),
-    class_weight=class_weights, 
+    class_weight=class_weights,  # <--- WEIGHTS ARE BACK ON!
     verbose=1
 )
 
