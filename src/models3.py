@@ -17,20 +17,20 @@ from datetime import datetime
 CRASH_THRESHOLD = 0.03       
 PREDICTION_TRIGGER = 0.50    # Lowered trigger to catch the 19% confidences!
 
-# 📁 DYNAMIC FOLDER SETUP
-# Generates a unique name like: "Run_20260317_173045"
+# Generates a unique name 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 EXPERIMENT_NAME = f"LSTM_Run_{timestamp}"
 
 OUTPUT_DIR = f"results/{EXPERIMENT_NAME}"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-print(f"--- 📁 Experiment tracking active. Saving to: {OUTPUT_DIR} ---")
+print(f"--- Experiment tracking active. Saving to: {OUTPUT_DIR} ---")
 
 # ==========================================
 # 1. LOAD DATASET
 # ==========================================
 
 print("\n--- 1. Loading & Engineering Features ---")
+
 file_path = 'data/processed/eth_merged_6h_clustered_2017.csv'
 data = pd.read_csv(file_path)
 data['hour'] = pd.to_datetime(data['hour'])
@@ -49,6 +49,7 @@ data = data.dropna()
 # 2. TARGET (24-Hour Lookahead Window)
 # ==========================================
 print(f"--- 2. Tagging Crashes (Drops >= {CRASH_THRESHOLD*100}% in EXACTLY the next 6 hours) ---")
+
 prices = data['Close'].values
 drawdown_labels = []
 
