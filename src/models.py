@@ -13,8 +13,8 @@ from sklearn.model_selection import train_test_split
 # ==========================================
 #  Fine-Tuning Hyperparameters
 # ==========================================
-EXPERIMENT_NAME = "LSTM_Threshold_5Percent_Adjusted"
-CRASH_THRESHOLD = 0.05       # 5% drop defines a crash
+EXPERIMENT_NAME = "LSTM_CanonicalLabel_3Percent"
+CRASH_THRESHOLD = 0.03       # Kept for logging only; target comes from dataset label.
 PREDICTION_TRIGGER = 0.15    # If AI is >15% sure, sound the alarm! (Lowered from 50%)
 
 # Setup automatic saving folder
@@ -36,20 +36,13 @@ data = data.sort_index()
 # ==========================================
 # 2. TARGET
 # ==========================================
-print(f"--- 2. Tagging Crashes (Drops >= {CRASH_THRESHOLD*100}%) ---")
+print(f"--- 2. Tagging Crashes (Drops >= {CRASH_THRESHOLD*100}% in EXACTLY the next 6 hours) ---")
 
-prices = data['Close'].values
-drawdown_labels = []
+if 'drawdown_6h_label' not in data.columns:
+    raise ValueError("Missing drawdown_6h_label in dataset; rebuild dataset before training.")
 
-for i in range(len(prices)):
-    if i == len(prices) - 1:
-        drawdown_labels.append(0)
-    else:
-        drop = (prices[i] - prices[i+1]) / prices[i]
-        drawdown_labels.append(1 if drop >= CRASH_THRESHOLD else 0)
-
-data['Target_Crash'] = drawdown_labels
-print(f"Total Crashes found in entire dataset: {sum(drawdown_labels)}")
+data['Target_Crash'] = data['drawdown_6h_label'].astype(int)
+print(f"Total Crashes found in entire dataset: {int(data['Target_Crash'].sum())}")
 
 # ==========================================
 # 3. FEATURE SELECTION & SCALING

@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
@@ -5,8 +6,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # 1. Define your file paths (Input = Original, Output = New Clustered File)
-input_file = '/Users/francescamaltoni/Desktop/ML-Project-2026/data/processed/eth_merged_6h_2021_3%.csv'
-output_file = '/Users/francescamaltoni/Desktop/ML-Project-2026/data/processed/eth_merged_6h_clustered_3%.csv'
+input_file  = 'data/processed/eth_merged_6h_2017_to_latest.csv'
+output_file = 'data/processed/eth_merged_6h_clustered_2017_to_latest.csv'
 
 # 2. Load the original dataset
 print(f"Loading data from: {input_file}")
@@ -72,4 +73,7 @@ plt.xlabel('Massive Whale Volume (ETH)')
 plt.ylabel('Max Gas Paid (Gwei)')
 plt.legend(title='Market Regime')
 plt.tight_layout()
-plt.show()
+os.makedirs('results', exist_ok=True)
+plt.savefig('results/cluster_plot.png')
+plt.close()
+print("Cluster plot saved to results/cluster_plot.png")
