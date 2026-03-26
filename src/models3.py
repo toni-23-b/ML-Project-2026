@@ -14,13 +14,9 @@ from datetime import datetime
 # ==========================================
 #  Fine-Tuning Hyperparameters
 # ==========================================
-<<<<<<< Updated upstream
-CRASH_THRESHOLD = 0.06   
-=======
 CRASH_THRESHOLD = 0.03       
 PREDICTION_TRIGGER = 0.52    # Shared threshold for fair whale vs price-only comparison.
 RUN_TEST_EVAL = False
->>>>>>> Stashed changes
 
 # Generates a unique name 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
