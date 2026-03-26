@@ -18,9 +18,9 @@ CRASH_THRESHOLD = 0.05       # 5% drop defines a crash
 PREDICTION_TRIGGER = 0.15    # If AI is >15% sure, sound the alarm! (Lowered from 50%)
 
 # Setup automatic saving folder
-OUTPUT_DIR = f"/Users/antoniabulai/Documents/GitHub/ML-Project-2026/{EXPERIMENT_NAME}"
+OUTPUT_DIR = f"results/{EXPERIMENT_NAME}"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-print(f"--- 📁 Experiment tracking active. Saving results to: {OUTPUT_DIR} ---")
+print(f"--- Experiment tracking active. Saving results to: {OUTPUT_DIR} ---")
 
 # ==========================================
 # 1. LOAD DATASET

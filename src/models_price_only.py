@@ -14,12 +14,12 @@ from datetime import datetime
 # ==========================================
 #  Fine-Tuning Hyperparameters
 # ==========================================
-CRASH_THRESHOLD = 0.03       
-PREDICTION_TRIGGER = 0.50    # Lowered trigger to catch the 19% confidences!
+CRASH_THRESHOLD = 0.03
+PREDICTION_TRIGGER = 0.50
 
-# Generates a unique name 
+# Generates a unique name
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-EXPERIMENT_NAME = f"LSTM_Run_{timestamp}"
+EXPERIMENT_NAME = f"LSTM_PriceOnly_Run_{timestamp}"
 
 OUTPUT_DIR = f"results/{EXPERIMENT_NAME}"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -31,18 +31,18 @@ print(f"--- Experiment tracking active. Saving to: {OUTPUT_DIR} ---")
 
 print("\n--- 1. Loading & Engineering Features ---")
 
-file_path = 'data/processed/eth_merged_6h_clustered_2017.csv'
+file_path = "data/processed/eth_price_only_6h_2017_to_latest.csv"
 data = pd.read_csv(file_path)
-data['hour'] = pd.to_datetime(data['hour'])
-data.set_index('hour', inplace=True)
+data["hour"] = pd.to_datetime(data["hour"])
+data.set_index("hour", inplace=True)
 data = data.sort_index()
 
-# THE BIG FIX: Convert raw numbers into Momentum (% Change)
-data['Close_Pct'] = data['Close'].pct_change()
-data['Volume_Pct'] = data['Volume ETH'].pct_change()
-data['Whale_Vol_Pct'] = data['massive_whale_volume'].pct_change()
+# Convert raw numbers into momentum (% change) features.
+data["Close_Pct"] = data["Close"].pct_change()
+data["Volume_Pct"] = data["Volume ETH"].pct_change()
+data["High_Pct"] = data["High"].pct_change()
 
-# Drop the first row because pct_change leaves a blank (NaN) value
+# Drop the first row because pct_change leaves a blank (NaN) value.
 data = data.dropna()
 
 # ==========================================
@@ -50,7 +50,7 @@ data = data.dropna()
 # ==========================================
 print(f"--- 2. Tagging Crashes (Drops >= {CRASH_THRESHOLD*100}% in EXACTLY the next 6 hours) ---")
 
-prices = data['Close'].values
+prices = data["Close"].values
 drawdown_labels = []
 
 for i in range(len(prices)):
@@ -58,24 +58,20 @@ for i in range(len(prices)):
         drawdown_labels.append(0)
     else:
         # Looking ONLY at the very next 6-hour segment
-        drop = (prices[i] - prices[i+1]) / prices[i]
+        drop = (prices[i] - prices[i + 1]) / prices[i]
         drawdown_labels.append(1 if drop >= CRASH_THRESHOLD else 0)
 
-data['Target_Crash'] = drawdown_labels
+data["Target_Crash"] = drawdown_labels
 print(f"Total Crashes found in entire dataset: {sum(drawdown_labels)}")
 
 # ==========================================
 # 3. FEATURE SELECTION & SCALING
 # ==========================================
 print("--- 3. Selecting and Scaling Features ---")
-# We swap out the raw numbers for our new Momentum columns!
-feature_columns = [
-    'Close_Pct', 'Volume_Pct', 'Whale_Vol_Pct', 
-    'max_gas_gwei', 'unique_large_senders', 'whale_contract_calls', 'Market_Regime'
-]
+feature_columns = ["Close_Pct", "Volume_Pct", "High_Pct"]
 
 features = data[feature_columns].values
-scaler = MinMaxScaler(feature_range=(0,1))
+scaler = MinMaxScaler(feature_range=(0, 1))
 scaled_features = scaler.fit_transform(features)
 
 # ==========================================
@@ -83,13 +79,13 @@ scaled_features = scaler.fit_transform(features)
 # ==========================================
 print("--- 4. Creating 6-Day Windows ---")
 
-window_size = 24 
+window_size = 24
 X, y = [], []
 target_dates = data.index[window_size:]
 
 for i in range(window_size, len(scaled_features)):
-    X.append(scaled_features[i - window_size:i]) 
-    y.append(data['Target_Crash'].iloc[i])       
+    X.append(scaled_features[i - window_size : i])
+    y.append(data["Target_Crash"].iloc[i])
 
 X = np.array(X)
 y = np.array(y)
@@ -117,7 +113,7 @@ neg = np.sum(y_train == 0)
 pos = np.sum(y_train == 1)
 pos = max(pos, 1)
 
-# Because crashes are rare again, we MUST penalize the AI for missing them
+# Because crashes are rare, penalize missing them
 weight_for_0 = (1 / neg) * (len(y_train) / 2.0)
 weight_for_1 = (1 / pos) * (len(y_train) / 2.0)
 class_weights = {0: weight_for_0, 1: weight_for_1}
@@ -131,17 +127,18 @@ model.add(LSTM(128, return_sequences=True, input_shape=(X_train.shape[1], X_trai
 model.add(Dropout(0.2))
 model.add(LSTM(128))
 model.add(Dropout(0.2))
-model.add(Dense(1, activation='sigmoid'))
+model.add(Dense(1, activation="sigmoid"))
 
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
 
 history = model.fit(
-    X_train, y_train,
-    epochs=20,          
-    batch_size=32,      
+    X_train,
+    y_train,
+    epochs=20,
+    batch_size=32,
     validation_data=(X_validate, y_validate),
-    class_weight=class_weights,  # <--- WEIGHTS ARE BACK ON!
-    verbose=1
+    class_weight=class_weights,
+    verbose=1,
 )
 
 # ==========================================
@@ -149,14 +146,14 @@ history = model.fit(
 # ==========================================
 print("\n--- 8. Plotting and Saving Loss Graph ---")
 plt.figure(figsize=(8, 5))
-plt.plot(history.history['loss'], label='Training Loss')
-plt.plot(history.history['val_loss'], label='Validation Loss')
-plt.title(f'LSTM Model Loss ({EXPERIMENT_NAME})')
-plt.ylabel('Loss')
-plt.xlabel('Epoch')
+plt.plot(history.history["loss"], label="Training Loss")
+plt.plot(history.history["val_loss"], label="Validation Loss")
+plt.title(f"LSTM Model Loss ({EXPERIMENT_NAME})")
+plt.ylabel("Loss")
+plt.xlabel("Epoch")
 plt.legend()
 plt.tight_layout()
-plt.savefig(f"{OUTPUT_DIR}/loss_graph.png") # Save image
+plt.savefig(f"{OUTPUT_DIR}/loss_graph.png")
 plt.show()
 
 # ==========================================
@@ -168,7 +165,7 @@ raw_probabilities = model.predict(X_validate)
 print(f"Highest confidence AI ever had for a crash: {max(raw_probabilities)[0]*100:.2f}%")
 print(f"Average confidence AI had overall: {np.mean(raw_probabilities)*100:.2f}%")
 
-# Force prediction to 1 if confidence is above our lowered trigger
+# Force prediction to 1 if confidence is above our trigger
 y_pred = (raw_probabilities > PREDICTION_TRIGGER).astype(int)
 
 # Print & Save the Report
@@ -184,12 +181,17 @@ with open(f"{OUTPUT_DIR}/classification_report.txt", "w") as f:
 # Plot & Save the Confusion Matrix
 cm = confusion_matrix(y_validate, y_pred)
 plt.figure(figsize=(6, 5))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
-            xticklabels=['Predicted Safe (0)', 'Predicted Crash (1)'],
-            yticklabels=['Actually Safe (0)', 'Actually Crash (1)'])
-plt.title(f'Confusion Matrix: Did it find crashes?\n(Trigger: {PREDICTION_TRIGGER})')
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt="d",
+    cmap="Blues",
+    xticklabels=["Predicted Safe (0)", "Predicted Crash (1)"],
+    yticklabels=["Actually Safe (0)", "Actually Crash (1)"],
+)
+plt.title(f"Confusion Matrix: Did it find crashes?\n(Trigger: {PREDICTION_TRIGGER})")
 plt.tight_layout()
-plt.savefig(f"{OUTPUT_DIR}/confusion_matrix.png") # Save image
+plt.savefig(f"{OUTPUT_DIR}/confusion_matrix.png")
 plt.show()
 
 print(f"\n✅ All done! Check the '{OUTPUT_DIR}' folder for your saved graphs and text report.")
