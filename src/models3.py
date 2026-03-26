@@ -17,7 +17,6 @@ from datetime import datetime
 CRASH_THRESHOLD = 0.03       
 PREDICTION_TRIGGER = 0.52    # Shared threshold for fair whale vs price-only comparison.
 RUN_TEST_EVAL = False
-
 # Generates a unique name 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 EXPERIMENT_NAME = f"LSTM_Run_{timestamp}"
@@ -32,7 +31,7 @@ print(f"--- Experiment tracking active. Saving to: {OUTPUT_DIR} ---")
 
 print("\n--- 1. Loading & Engineering Features ---")
 
-file_path = 'data/processed/eth_merged_6h_2017_to_latest.csv'
+file_path = 'data/processed/eth_merged_6h_clustered_2017.csv'
 data = pd.read_csv(file_path)
 data['hour'] = pd.to_datetime(data['hour'])
 data.set_index('hour', inplace=True)
@@ -72,7 +71,8 @@ print("--- 3. Selecting and Scaling Features ---")
 # We swap out the raw numbers for our new Momentum columns!
 feature_columns = [
     'Close_Pct', 'Volume_Pct', 'Whale_Vol_Pct', 
-    'max_gas_gwei', 'unique_large_senders', 'whale_contract_calls'
+
+    'max_gas_gwei', 'unique_large_senders', 'whale_contract_calls', 'Market_Regime'
 ]
 
 features = data[feature_columns].values
@@ -160,9 +160,11 @@ plt.tight_layout()
 plt.savefig(f"{OUTPUT_DIR}/loss_graph.png") # Save image
 plt.show()
 
+
 # ====================================================
 # 9. THE LIE DETECTOR (CONFUSION MATRIX and ROC CURVE)
 # ====================================================
+
 print("\n--- 9. Evaluating on Validation Set ---")
 raw_probabilities = model.predict(X_validate)
 
