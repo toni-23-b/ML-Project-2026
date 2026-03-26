@@ -17,7 +17,7 @@ from sklearn.metrics import roc_curve, auc
 #  Fine-Tuning Hyperparameters
 # ==========================================
 CRASH_THRESHOLD = 0.03
-PREDICTION_TRIGGER = 0.5
+PREDICTION_TRIGGER = 0.50
 RUN_TEST_EVAL = False
 
 # Generates a unique name

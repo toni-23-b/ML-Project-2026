@@ -1,0 +1,14 @@
+{
+  "crash_threshold": 0.03,
+  "prediction_trigger": 0.5,
+  "window_size": 24,
+  "epochs": 20,
+  "batch_size": 32,
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "split": "chronological 70/15/15, shuffle=False",
+  "target": "drawdown_6h_label"
+}
