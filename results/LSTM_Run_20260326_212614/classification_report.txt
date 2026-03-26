@@ -1,0 +1,11 @@
+Experiment: LSTM_Run_20260326_212614
+Trigger Threshold used: 0.45
+
+              precision    recall  f1-score   support
+
+           0       0.88      0.53      0.66      1124
+           1       0.21      0.63      0.32       224
+
+    accuracy                           0.55      1348
+   macro avg       0.55      0.58      0.49      1348
+weighted avg       0.77      0.55      0.61      1348
