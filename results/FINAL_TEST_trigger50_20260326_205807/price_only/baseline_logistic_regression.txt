@@ -1,0 +1,13 @@
+Baseline: Logistic Regression (class_weight='balanced')
+Model: price_only
+Seed: 42  |  Crash threshold: 0.03
+ROC-AUC: 0.6019
+
+              precision    recall  f1-score   support
+
+    Safe (0)       0.97      0.55      0.70      1303
+   Crash (1)       0.04      0.59      0.08        46
+
+    accuracy                           0.55      1349
+   macro avg       0.51      0.57      0.39      1349
+weighted avg       0.94      0.55      0.68      1349

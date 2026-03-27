@@ -1,0 +1,11 @@
+{
+  "protocol": "frozen-final-test",
+  "seed": 42,
+  "crash_threshold": 0.03,
+  "prediction_trigger": 0.5,
+  "window_size": 24,
+  "epochs": 20,
+  "batch_size": 32,
+  "split": "chronological 70/15/15, shuffle=False",
+  "note": "No hyperparameter tuning after test results"
+}

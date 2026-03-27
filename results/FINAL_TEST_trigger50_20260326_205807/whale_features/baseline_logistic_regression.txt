@@ -1,0 +1,13 @@
+Baseline: Logistic Regression (class_weight='balanced')
+Model: whale_features
+Seed: 42  |  Crash threshold: 0.03
+ROC-AUC: 0.6132
+
+              precision    recall  f1-score   support
+
+    Safe (0)       0.97      0.91      0.94      1303
+   Crash (1)       0.06      0.17      0.09        46
+
+    accuracy                           0.88      1349
+   macro avg       0.52      0.54      0.52      1349
+weighted avg       0.94      0.88      0.91      1349

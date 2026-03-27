@@ -1,0 +1,13 @@
+Model: price_only
+Trigger Threshold used: 0.5
+Crash Threshold used: 0.03
+Seed: 42
+
+              precision    recall  f1-score   support
+
+           0       0.97      0.94      0.95      1303
+           1       0.02      0.04      0.03        46
+
+    accuracy                           0.91      1349
+   macro avg       0.49      0.49      0.49      1349
+weighted avg       0.93      0.91      0.92      1349

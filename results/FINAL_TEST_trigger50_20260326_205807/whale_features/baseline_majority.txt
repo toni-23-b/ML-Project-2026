@@ -1,0 +1,12 @@
+Baseline: Majority Class (predict always class 0)
+Model: whale_features
+Seed: 42  |  Crash threshold: 0.03
+
+              precision    recall  f1-score   support
+
+    Safe (0)       0.97      1.00      0.98      1303
+   Crash (1)       0.00      0.00      0.00        46
+
+    accuracy                           0.97      1349
+   macro avg       0.48      0.50      0.49      1349
+weighted avg       0.93      0.97      0.95      1349
