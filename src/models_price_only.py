@@ -148,7 +148,7 @@ plt.savefig(f"{OUTPUT_DIR}/loss_graph.png")
 plt.close()
 
 # ==========================================
-# 9. THE LIE DETECTOR (CONFUSION MATRIX)
+# 9. THE LIE DETECTOR (CONFUSION MATRIX AND ROC CURVE)
 # ==========================================
 print("\n--- 9. Evaluating on Validation Set ---")
 raw_probabilities = model.predict(X_validate)
@@ -160,6 +160,21 @@ print(f"Average confidence AI had overall: {np.mean(raw_probabilities)*100:.2f}%
 y_pred = (raw_probabilities > PREDICTION_TRIGGER).astype(int)
 
 # Print & Save the Report
+fpr, tpr, thresholds = roc_curve(y_validate, raw_probabilities)
+
+roc_auc = auc(fpr, tpr)
+
+plt.figure(figsize=(8,6))
+plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+plt.plot([0,1], [0,1], linestyle='--')  # random baseline
+
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate (Recall)")
+plt.title("ROC Curve")
+plt.savefig(f"{OUTPUT_DIR}/roc_curve.png")
+plt.legend()
+plt.show()
+
 report_text = classification_report(y_validate, y_pred, zero_division=0)
 print(f"\nClassification Report (Trigger > {PREDICTION_TRIGGER*100}%):")
 print(report_text)

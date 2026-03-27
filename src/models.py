@@ -15,8 +15,8 @@ from sklearn.model_selection import train_test_split
 # ==========================================
 
 EXPERIMENT_NAME = "LSTM_CanonicalLabel_3Percent"
-CRASH_THRESHOLD = 0.03       # Kept for logging only; target comes from dataset label.
-PREDICTION_TRIGGER = 0.15    # If AI is >15% sure, sound the alarm! (Lowered from 50%)
+CRASH_THRESHOLD = 0.03    
+PREDICTION_TRIGGER = 0.15
 
 # Setup automatic saving folder
 OUTPUT_DIR = f"results/{EXPERIMENT_NAME}"
@@ -28,7 +28,7 @@ print(f"--- Experiment tracking active. Saving results to: {OUTPUT_DIR} ---")
 # ==========================================
 print("\n--- 1. Loading Clustered Dataset ---")
 
-file_path = 'data/processed/eth_merged_6h_2021_to_latest.csv'
+file_path = 'data/processed/eth_merged_6h_clustered_2017_to_latest.csv'
 data = pd.read_csv(file_path)
 data['hour'] = pd.to_datetime(data['hour'])
 data.set_index('hour', inplace=True)
